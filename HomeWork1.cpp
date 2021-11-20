@@ -50,7 +50,7 @@ int main(int choice) {
     cin >> choice;
 
     switch (choice) {
-    case (1): {cout << "Герман\n"; break; };
+    case (1): {cout << "Мое имя\n"; break; };
         case (2): {
             double a, b;
             abgoto2:cout << "Введите A и B: ";

@@ -110,7 +110,6 @@ void only_num_out() {
         }
     }
     cout << endl;
-    system("pause");
 }
 
 // Quicksort

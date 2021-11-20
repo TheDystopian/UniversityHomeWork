@@ -43,33 +43,31 @@ void perc() {
 
 
 // 3
-#include <iostream>
 
 void file_create_and_write() {
-    string a, b;
+    string a;
 
-    cout << "Запись в текстовый файл. напишите то, что нужно туда написать\n";
-    getline(cin,a);
+    cout << "Запись в текстовый файл. напишите то, что нужно туда написать\n";cin.ignore();
     getline(cin, a);
     ofstream fout("111.txt");
     fout << a;
     fout.close();
 
     ifstream fin("111.txt");
-    getline(fin, b);
+    getline(fin, a);
     fin.close();
 
-    cout << "В тектовом файле записано\n" << b << endl;
+    cout << "В тектовом файле записано\n" << a << endl;
 }
 
 
 void only_num_out() {
     string a, b;
     
-    cout << "Эта программа выведет только числа, окруженные пробелами. Вводить можно что угодно\n"; getchar();
+    cout << "Эта программа выведет только числа, окруженные пробелами. Вводить можно что угодно\n";cin.ignore();
 
-    inputgoto1:getline(cin,a);
-    if (a.length() == 0) { cout << "Введи что нибудь!\n"; goto inputgoto1; }
+    getline(cin,a);
+    if (a.length() == 0) return;
     ofstream out1("abc.txt");
     out1 << a;
     ifstream in1("abc.txt");
@@ -136,11 +134,10 @@ string upperinsert (string upper, string lower) {
 void sorter() {
     string a, b, bupper;
 
-    cout << "Что вам надо отсортировать?\n";
+    cout << "Что вам надо отсортировать?\n";cin.ignore();
 
     getline(cin, a);
-    inputgoto1:getline(cin, a);
-    if (a.length() == 0) { cout << "Введи что нибудь!\n"; goto inputgoto1; }
+    if (a.length() == 0) return;
     ofstream fout1("111.txt");
     fout1 << a;
     fout1.close();

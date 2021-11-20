@@ -3,8 +3,7 @@
 #include <fstream>
 #include <string>
 
-namespace FISTING = std;
-using namespace FISTING;
+using namespace std;
 
 void monthly_pay() {
     double S, n, p;
@@ -39,25 +38,22 @@ void perc() {
     }
 }
 
-
 // 3
-#include <iostream>
-
 void file_create_and_write() {
     string a, b;
 
-    cout << "Запись в текстовый файл. напишите то, что нужно туда написать\n";
-    getline(cin,a);
+    cout << "Запись в текстовый файл. напишите то, что нужно туда написать\n";cin.ignore();
+
     getline(cin, a);
     ofstream fout("111.txt");
     fout << a;
     fout.close();
 
     ifstream fin("111.txt");
-    getline(fin, b);
+    getline(fin, a);
     fin.close();
 
-    cout << "В тектовом файле записано\n" << b << endl;
+    cout << "В тектовом файле записано\n" << a << endl;
 }
 
 
@@ -65,11 +61,11 @@ void only_num_out() {
     string a, b, c;
     bool dot = false;
     
-    cout << "Эта программа выведет только числа, окруженные пробелами. Вводить можно что угодно\n";
+    cout << "Эта программа выведет только числа, окруженные пробелами. Вводить можно что угодно\n";cin.ignore();
 
-    getline(cin, a);
-    inputgoto1:getline(cin,a);
-    if (a.length() == 0) { cout << "Введи что нибудь!\n"; goto inputgoto1; }
+
+    getline(cin,a);
+    if (a.length() == 0) return;
     ofstream fout("111.txt");
     fout << a;
     fout.close();
@@ -159,11 +155,10 @@ string upperinsert (string upper, string lower) {
 void sorter() {
     string a, b, bupper;
 
-    cout << "Что вам надо отсортировать?\n";
+    cout << "Что вам надо отсортировать?\n";cin.ignore();
 
     getline(cin, a);
-    inputgoto1:getline(cin, a);
-    if (a.length() == 0) { cout << "Введи что нибудь!\n"; goto inputgoto1; }
+    if (a.length() == 0) return;
     ofstream fout1("111.txt");
     fout1 << a;
     fout1.close();
@@ -190,15 +185,15 @@ void sorter() {
 int main() {
     setlocale(0, "");
     short int x;
-    FISTING::cout << "Выберите программу\n1. Вычисление месячной выплаты\n2. Ссуда\n3. Копирование файла\n4. Фильтр чисел\n5. Сортировка строки\n";
-    FISTING::cin >> x;
+    cout << "Выберите программу\n1. Вычисление месячной выплаты\n2. Ссуда\n3. Копирование файла\n4. Фильтр чисел\n5. Сортировка строки\n";
+    cin >> x;
     switch (x) {
     case 1: {monthly_pay(); break; }
     case 2: {perc(); break;}
     case 3: {file_create_and_write(); break; }
     case 4: {only_num_out(); break; }
     case 5: {sorter(); break; }
-    default: FISTING::cout << "Неправильный ввод!\n";
+    default: cout << "Неправильный ввод!\n";
     }
     system("pause");
 }

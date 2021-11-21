@@ -40,7 +40,7 @@ void perc() {
 
 // 3
 void file_create_and_write() {
-    string a, b;
+    string a;
 
     cout << "Запись в текстовый файл. напишите то, что нужно туда написать\n";cin.ignore();
 

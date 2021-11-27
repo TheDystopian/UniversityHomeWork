@@ -4,7 +4,6 @@
 #include <string>
 #include <cmath>
 #include <sstream>
-#include <csignal>
 
 using namespace std;
 //////////////////////
@@ -42,7 +41,7 @@ void eratosphen() {
 				isPrime[j] = false;
 
 	cout << "Простые числа\n";
-	for (int i = 2; i < n; i++)
+	for (int i = 2; i <= n; i++)
 		if (isPrime[i]) cout << i << " ";
 
 
@@ -84,7 +83,7 @@ void TextFile() {
 		fstream in1("abc.txt", ios::out);
 		for (auto out : file) {
 			cout << out << '\n';
-			in1 << out << '/n';
+			in1 << out << '\n';
 		}
 		break;
 	}

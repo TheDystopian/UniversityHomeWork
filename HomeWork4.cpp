@@ -10,7 +10,7 @@ using namespace std;
 
 // Создать файл, записать в него 10 чисел, закрыть, потом вновь открыть файл и найти сумму чисел
 void summ_10_ints() {
-    int b,summ = 0;
+    int b, summ = 0;
 
     ofstream numwrite("numbers.txt");
     for (int i = 0; i < 10; i++) {
@@ -53,7 +53,7 @@ double CountTriangleHeron() {
     cout << "Введите все стороны\n";
     if (!(cin >> a >> b >> c)) return -1;
     double halfp = (a + b + c) / 2;
-    return sqrt(halfp * (halfp - a) * (halfp - b) * (halfp - c) );
+    return sqrt(halfp * (halfp - a) * (halfp - b) * (halfp - c));
 }
 
 // Площадь круга
@@ -75,7 +75,7 @@ void count_area() {
     case 3: out = CountCircle(); break;
     default: {cout << "Некорректный ввод!\n"; return; }
     }
-    if (out > 0) {cout << out << endl; system("pause"); }
+    if (out > 0) { cout << out << endl; system("pause"); }
     else { cout << "Некорректный треугольник!\n"; system("pause"); }
 }
 
@@ -85,7 +85,7 @@ void count_area() {
 
 void roman() {
     // Переменные
-    map <char, int> dict = {{'I', 1},{'V', 5},{'X', 10},{'L', 50}, {'C', 100}, {'D', 500} , {'M', 1000}};
+    map <char, int> dict = { {'I', 1},{'V', 5},{'X', 10},{'L', 50}, {'C', 100}, {'D', 500} , {'M', 1000} };
     string a;
     int result = 0;
 
@@ -113,7 +113,7 @@ void roman() {
 // Получение данных об окне консоли
 HDC device_context = GetDC(GetConsoleWindow());
 
-void flag_background(HBRUSH brush, const int heightline, int &height) {
+void flag_background(HBRUSH brush, const int heightline, int& height) {
     // Рисование линий длиной в height
     // Сдвиг для начальной линии еще имеет "--" перед height чтобы не было расстояния между линиями и чтобы "-" не воспринимался как "---"
     SelectObject(device_context, brush);
@@ -132,7 +132,7 @@ void hide_cursor() {
 
 void flag_glory() {
     hide_cursor();
-    
+
     // Высота
     // heightline - высота 1 линии
     // height - высота глобальная
@@ -140,7 +140,7 @@ void flag_glory() {
     int height = heightline;
 
     // Кисти
-    HBRUSH red_brush = CreateSolidBrush(RGB(255,0,0));
+    HBRUSH red_brush = CreateSolidBrush(RGB(255, 0, 0));
     HBRUSH white_brush = CreateSolidBrush(RGB(255, 255, 255));
     HBRUSH blue_brush = CreateSolidBrush(RGB(0, 0, 255));
     // Линии
@@ -152,7 +152,7 @@ void flag_glory() {
 
     // синий прямоугольник
     SelectObject(device_context, blue_brush);
-    Rectangle(device_context, 0, 0, 1050 / 3 , height * 6 / 14);
+    Rectangle(device_context, 0, 0, 1050 / 3, height * 6 / 14);
 
     // Назначение позиции точек
     // вычисляется по формуле
@@ -165,11 +165,11 @@ void flag_glory() {
     SelectObject(device_context, white_brush);
     for (int i = 1; i <= 6; i++) {
         for (int j = 1; j <= 8; j++)
-            Ellipse(device_context, dotlocwidth * j-10, dotlocheight * i-10, dotlocwidth * j +10, dotlocheight * i+10);
+            Ellipse(device_context, dotlocwidth * j - 10, dotlocheight * i - 10, dotlocwidth * j + 10, dotlocheight * i + 10);
     }
     // Эта строчка просто существовала
     // ReleaseDC(console_handle, device_context);
-    
+
     // И немного deadmau5 для вечного сна )))
     while (1 < 2) Sleep(1);
 }
@@ -206,7 +206,7 @@ void draw_sinus() {
     // Масштаб ширины графика, чем больше, тем меньше отображаемый график
     double graph_width_scale = 4;
 
-    // Смещение от верхнего левого угла 
+    // Смещение от верхнего левого угла
     int graph_offset_width = 20;
     int graph_offset_height = 20;
 
@@ -219,11 +219,11 @@ void draw_sinus() {
 
 
     // Ручки
-    HPEN white_pen = CreatePen(BS_SOLID, 2,RGB(255, 255, 255));
+    HPEN white_pen = CreatePen(BS_SOLID, 2, RGB(255, 255, 255));
 
     // Защита от дурака
-    // Начальная точка графика будет всегда меньше конечной 
-    if (begin_graph > end_graph) { 
+    // Начальная точка графика будет всегда меньше конечной
+    if (begin_graph > end_graph) {
         std::swap(begin_graph, end_graph);
         std::swap(graph_width_left, graph_width_right);
     }
@@ -271,22 +271,26 @@ void draw_sinus() {
 
 void PseudoRandom() {
     // Начальные значения
-    int m = 25173;
-    int itarget = 13849;
-    int c = 65537;
-    vector <int> s = {0};
+    int itarget, choice, m = 0, i = 0, c = 1;
+    vector <int> s = { 0 };
 
-    // Подсчет псевдослучайной переменной
-    for (int i = 0; i < itarget; i++) {
-        // Генерация
-        s.push_back((m * s[0] + i) % c);
-        // Это сильно уменьшает потребление памяти
-        if (s.size() > 1) s.erase(s.begin());
-        // Генерация в настоящем времени
-        // cout << "S" << i << " = " << s[0] << "\n";
+    // Вопросы для пользователя
+    cout << "Сколько чисел нужно сгенерировать?: ";
+    if (!(cin >> itarget) || itarget < 1) return;
+    cout << "Выберите значение для алгоритма?\n1. m=37, i=3, c=64\n2. m=25173, i=13849, c=65537\n";
+    cin >> choice;
+
+    // Задаем числа в зависимости от выбранного варианта
+    switch (choice) {
+    case 1: { m = 37, i = 3, c = 64; break; }
+    case 2: { m = 25173, i = 13849, c = 65537; break; }
+    default: return;
     }
-    // Готовый результат
-    cout << "S" << itarget << " = " << s[0] << "\n";
+    // Сам алгоритм. Числа записываются в вектор, чтобы вывести пользователю нужное количество чисел
+    for (int j = 0; j < itarget; j++) s.push_back((m * s[j] + i) % c);
+    s.erase(s.begin()); // Стирается 0 в начале, который был добавлен с целью предотвратить выход за пределы массива
+    cout << "Вот сгенерированные числа";
+    for (auto j : s) cout << j << '\n';
 }
 
 float summ_vect(vector <float> price_total) {
@@ -296,9 +300,9 @@ float summ_vect(vector <float> price_total) {
     return summ;
 }
 
-tuple <int,int,float,float,float> min_max(vector <float> price_total) {
+tuple <int, int, float, float, float> min_max(vector <float> price_total) {
     float min_pos = 0, max_pos = 0;
-    for(int i = 0; i < price_total.size(); i++) {
+    for (int i = 0; i < price_total.size(); i++) {
         if (price_total[i] < price_total[min_pos]) min_pos = i;
         if (price_total[i] > price_total[max_pos]) max_pos = i;
     }
@@ -337,14 +341,14 @@ void multi_matrix() {
 // Конвертер в другую систему счисления //
 //////////////////////////////////////////
 
-void Convertxtoy () {
+void Convertxtoy() {
 
     int src_num_sys, new_num_sys;
     string src_num;
 
     cout << "Введите число, которое надо преобразовать\n";
     cin >> src_num;
-    for (int i = 0; i < src_num.length(); i++) 
+    for (int i = 0; i < src_num.length(); i++)
         src_num[i] = toupper(src_num[i]);
 
     cout << "В какой оно системе счисления\n";
@@ -359,10 +363,10 @@ void Convertxtoy () {
             dec_num += (src_num[i] + 10 - 'A') * pow(src_num_sys, src_num.length() - i - 1);
         else return;
 
-    cout << "Какова целевая система счисления\n"; 
+    cout << "Какова целевая система счисления\n";
     if (!(cin >> new_num_sys)) return;
     cout << "Результат: ";
-    
+
     // Перевод в другую систему счисления
     if (new_num_sys != src_num_sys) {
         string ready_num;

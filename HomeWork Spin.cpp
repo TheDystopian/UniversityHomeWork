@@ -61,8 +61,8 @@ void train() {
     while (cin >> temp_place) {
         if (temp_place == place) { cout << 0; return; }
         if (temp_place > 54 || temp_place < 1) break; // Обход неумения анализа значений while
-        place = temp_place;
-        coupe[place < 36 ? place / 4 : 8 - ((place + 1) / 2 - 19)] = false;
+        place = --temp_place;
+        coupe[place < 35 ? place / 4 : 8 - ((place + 1) / 2 - 19)] = false;
     }
 
     for (auto a : coupe) {
@@ -182,11 +182,19 @@ void cinema() {
     cout << (max - 1) / 2 << "\n" << max / 2;
 }
 
+#undef max
+
 void _choice() {
     short int choice;
 
-    cout << "Выберите программу\n1. Спиннеры\n2. Снова спиннеры\n3. Не про спиннеры\n4. Плацкартный вагон\n5. Кинотеатр\n" << (musicPlay == 0 ? "0. Включить музыку (Ее громкость зависит от системной громкости)\n" : "0. Выключить музыку\n");
-    cin >> choice;
+    do {
+        if (!cin) {
+            cin.clear();
+            cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
+        cout << "Выберите программу\n1. Спиннеры\n2. Снова спиннеры\n3. Не про спиннеры\n4. Плацкартный вагон\n5. Кинотеатр\n" << (musicPlay == 0 ? "0. Включить музыку (Ее громкость зависит от системной громкости)\n" : "0. Выключить музыку\n");
+        cin >> choice;
+    } while (!cin);
 
     switch (choice) {
     case 1: {spin_1(); break; }
@@ -196,7 +204,7 @@ void _choice() {
     case 5: {cinema(); break; }
     case 0: {
         musicPlay = !musicPlay;
-        auto Z = async(RR);  
+        auto Z = async(RR);
         _choice();
         break;
     }

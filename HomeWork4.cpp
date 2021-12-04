@@ -119,6 +119,7 @@ void flag_background(HBRUSH brush, const int heightline, int& height) {
     SelectObject(device_context, brush);
     Rectangle(device_context, 0, --height - heightline, 1100, height);
     height += heightline;
+    Sleep(1); // Избегание черной полосы 
 }
 
 void hide_cursor() {
@@ -224,8 +225,8 @@ void draw_sinus() {
     // Защита от дурака
     // Начальная точка графика будет всегда меньше конечной
     if (begin_graph > end_graph) {
-        std::swap(begin_graph, end_graph);
-        std::swap(graph_width_left, graph_width_right);
+        swap(begin_graph, end_graph);
+        swap(graph_width_left, graph_width_right);
     }
 
     // чтобы не было лишних сдвигов
@@ -246,7 +247,7 @@ void draw_sinus() {
     // от начальной точки до конечной
     for (double i = begin_graph + ((abs(begin_graph) + abs(end_graph)) / precision); i <= end_graph; i += (abs(begin_graph) + abs(end_graph)) / precision) {
         // RGB ручка ))
-        HPEN rgb_pen = CreatePen(BS_SOLID, 2, RGB(rand() % 256, rand() % 256, rand() % 256));
+        HPEN* rgb_pen = new HPEN(CreatePen(BS_SOLID, 2, RGB(rand(), rand(), rand())));
         // Формулы
         // Ось x - смещение от левого края окна программы + длина графика с левого края слева + позиция цикла * высота графика / масштаб графика
         // Ось y - (синус позиции цикла - 1) * -высота графика / 2 + смещение от верхнего края программы
@@ -255,8 +256,9 @@ void draw_sinus() {
         double xcurr = graph_offset_width + graph_width_left + i * graph_height / graph_width_scale;
         double ycurr = (sin(i) - 1) * -graph_height / 2 + graph_offset_height;
         // рисование от предыдущей точки до текущей и обновление предыдущей точки
-        line(xprev, yprev, xcurr, ycurr, rgb_pen);
+        line(xprev, yprev, xcurr, ycurr, *rgb_pen);
         i_prev = i;
+        delete rgb_pen;
         // Эффект красивого появления синусоиды
         Sleep(16);
     }

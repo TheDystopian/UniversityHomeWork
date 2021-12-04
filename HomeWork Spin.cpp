@@ -15,23 +15,16 @@ void spin_1() {
 
     c -= a; // Сразу вычту основу - почему бы и нет
 
-    if (c < b) {
-        cout << "Ему хватит только на основу или вообще не хватит"; return;
-    }
-
-    cout << c / b;
+    printf(c < b ? "Ему хватит только на основу или вообще не хватит" : "%d", c / b); // Иногда C просто удобнее 
 }
 
 void spin_2() {
-    int a, spin_f = 0;
+    int a, spin_f;
 
     cout << "Сколько у вас лопастей: ";
     if (!(cin >> a)) return;
 
-    while (a % 3 > 0 && a > 3) {
-        a -= 4;
-        spin_f++;
-    }
+    for (spin_f = 0; a % 3 > 0 && a > 3; spin_f++) a -= 4;
 
     cout << a / 3 << "\n" << spin_f;
 }
@@ -43,9 +36,8 @@ void not_spin() {
     if (!(cin >> n >> m) || n < 1 || m < 1) return;
 
     for (int j = 0; j < n; j++) {
-        for (int i = 0; i < m; i++) {
+        for (int i = 0; i < m; i++)
             res += m > 1 ? i + 1 : 0;
-        }
         res += n > 1 ? j + 1 : 0; // Вперед тернарники, освободите от лишнего кода
     }
 

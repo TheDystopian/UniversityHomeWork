@@ -59,7 +59,7 @@ void TextFile() {
 	} while (*filelines != "");
 
 	out1.close(); filelines->clear();
-	
+
 	vector <string> file;
 	fstream in1("abc.txt", ios::in);
 	while (getline(in1, *filelines)) file.push_back(*filelines);
@@ -96,7 +96,7 @@ void TextFile() {
 				if (max.length() == 0 || curr.length() > max.length()) max = curr;
 
 			}
-		
+
 		}
 		cout << "Максимальная длина у слова: " << max << ". Его длина равна: " << max.length() << endl;
 		cout << "Минимальная длина у слова: " << min << ". Его длина равна: " << min.length() << endl;

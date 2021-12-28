@@ -15,35 +15,26 @@ using std::vector;
 using std::ofstream;
 using std::unique_ptr;
 
-int input_nums(const char* str) {
-	auto out = std::unique_ptr<unsigned int>(new unsigned int()); // This will be out
+unsigned input_nums(const char* str) {
+	unsigned out; // This will be out
 	std::cout << str; // Ask what to enter
-	while (!(std::cin >> *out)) { // Request correct user input
-	// if any illegal char will be entered, it wll ask for it again
+	while (!(std::cin >> out)) { // Request correct user input
+	// if any illegal char will be entered, program will ask for it again
 		std::cin.clear();
-		std::cin.ignore(100, '\n');
+		std::cin.ignore(1, '\n');
 	}
 	// And out
-	return *out;
+	return out;
 }
 
 int next_gen(vector<string>& buffer, vector<string>& next_arr) {
 	int count_cells = 0; // Alive cells
 	for (size_t i = 0; i < buffer.size(); i++)
 		for (size_t j = 0; j < buffer[i].length(); j++) {
-			// Border detection
-			bool border[] = { true,true,true,true }; // up, left, down,right
-
-			if (i == 0) border[0] = false; // Upper border
-			if (i == buffer.size() - 1) border[2] = false; // Down border
-
-			if (j == 0) border[1] = false; // Left border
-			if (j == buffer[i].length() - 1) border[3] = false; // Right border
-
 			// Count neighboring cells
 			int count_neighbors = 0;
-			for (size_t k = i - border[0]; k <= i + border[2]; k++)
-				for (size_t l = j - border[1]; l <= j + border[3]; l++)
+			for (size_t k = i - (i != 0); k <= i + (i != buffer.size() - 1); k++) // Because true = 1 and false = 0, i can use them as a number
+				for (size_t l = j - (j != 0); l <= j + (j != buffer[i].length() - 1); l++)
 					if (buffer[k][l] != ' ') count_neighbors++;
 
 			// RULE IMPLEMENTATION
@@ -162,6 +153,8 @@ int main(int argc, char** argv) {
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(50) - (std::chrono::high_resolution_clock::now() - before)); // Prevent too fast code execution
 	}
+	if (alive != 0) cerr << "\nGenerations ended";
 	cerr << "\nPress any key to exit";
+	cin.ignore();
 	cin.get();
 }

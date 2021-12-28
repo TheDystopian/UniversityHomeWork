@@ -14,13 +14,13 @@
 # include <ncurses/ncurses.h>
 #endif
 
-int input_nums(const char* str) {
+unsigned input_nums(const char* str) {
 	auto out = std::unique_ptr<unsigned int>(new unsigned int()); // This will be out
 	std::cout << str; // Ask what to enter
 	while (!(std::cin >> *out)){ // Request correct user input
 	// if any illegal char will be entered, it wll ask for it again
 	std::cin.clear(); 
-	std::cin.ignore(100,'\n');
+	std::cin.ignore(1,'\n');
 	}
 	// And out
 	return *out;
@@ -30,19 +30,10 @@ int next_gen(std::vector<std::vector<char>> &playSpace, std::vector<std::vector<
 	int count_cells = 0; // Alive cells
 	for (int i = playSpace.size()-1; i > -1; i--)
 		for (int j = playSpace[i].size()-1; j > -1; j--) {
-			// Border detection
-			bool border[] = {true,true,true,true}; // up, left, down,right
-
-			if (i == 0) border[0] = false; // Upper border
-			if (i == playSpace.size()-1) border[2] = false; // Down border
-
-			if (j == 0) border[1] = false; // Left border
-			if (j == playSpace[i].size()-1) border[3] = false; // Right border
-
 			// Count neighboring cells
 			int count_neighbors = 0;
-			for (int k = i - border[0]; k <= i + border[2]; k++)
-				for (int l = j - border[1]; l <= j + border[3]; l++)
+			for (int k = i - (i != 0); k <= i + (i != playSpace.size()-1); k++)
+				for (int l = j - (j != 0); l <= j + (j != playSpace[i].size()-1); l++)
 					if (playSpace[k][l] != ' ') count_neighbors++;
 
 			// RULE IMPLEMENTATION
@@ -61,7 +52,7 @@ int next_gen(std::vector<std::vector<char>> &playSpace, std::vector<std::vector<
 	return count_cells; // Return ounter of living cells
 }
 
-int print_arr(std::vector<std::vector<char>> &next_arr) {
+void print_arr(std::vector<std::vector<char>> &next_arr) {
 	auto write_workout = std::unique_ptr<std::ofstream>(new std::ofstream("work.out")); // Write to file
 	// For each elemrnt in file, write to it
 	// Output to console and file
@@ -74,8 +65,6 @@ int print_arr(std::vector<std::vector<char>> &next_arr) {
 		*write_workout << '\n';
 	}
 	write_workout->close(); // Close file to write to it
-
-	return next_gen(*std::unique_ptr<std::vector<std::vector<char>>>(new std::vector<std::vector<char>> (next_arr)), next_arr); // Return alive cells to save space
 }
 
 int main(int argc, char** argv) {	
@@ -146,20 +135,20 @@ int main(int argc, char** argv) {
 
 		printw("Gen: %d\n", j+1); // Print current gen
 
-		alive = print_arr(playSpace); // Start function to walk through generations
+		print_arr(playSpace); // Render array
 
-		// If everyone died end function
-		if (alive == 0) {printw("Everyone died"); break;}
+		// Count living cells
+		alive = next_gen(*std::unique_ptr<std::vector<std::vector<char>>>(new std::vector<std::vector<char>> (playSpace)), playSpace); 
+		if (alive == 0) {printw("Everyone died"); break;} // Stop when everyone died
 		printw("%d cells alive", alive);
 
 		refresh(); // Update console output
-
 		// Second part of blinking reducement - wait until everything is drawn
-		std::this_thread::sleep_for(std::chrono::milliseconds(75) - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - before));
+		std::this_thread::sleep_for(std::chrono::milliseconds(50) - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - before));
 	}
 	// if generations will end
 	if (alive != 0) printw("\nGenerations ended"); 
-	// Wait for user input befor exit
+	// Wait for user input beforу exit
 	printw("\nPress any key to exit"); 
 	refresh();
 	getch();

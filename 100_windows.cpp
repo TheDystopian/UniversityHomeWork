@@ -27,28 +27,10 @@ int input_nums(const char* str) {
 	return *out;
 }
 
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-
-void cls(){ // Clearing screen
-	static const HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE); // Get console window
-
-	cerr.flush(); // Flush 
-
-	CONSOLE_SCREEN_BUFFER_INFO csbi;
-	GetConsoleScreenBufferInfo(hOut, &csbi);
-
-	DWORD length = csbi.dwSize.X * csbi.dwSize.Y;
-	DWORD written;
-
-	FillConsoleOutputAttribute(hOut, csbi.wAttributes, length, { 0, 0 }, &written); 
-	SetConsoleCursorPosition(hOut, { 0, 0 }); // This should be enough to refresh screen
-}
-
-int next_gen(vector<std::vector<char>>& playSpace, vector<std::vector<char>>& next_arr) {
+int next_gen(vector<string>& playSpace, vector<string>& next_arr) {
 	int count_cells = 0; // Alive cells
-	for (int i = playSpace.size() - 1; i > -1; i--)
-		for (int j = playSpace[i].size() - 1; j > -1; j--) {
+	for (size_t i = 0; i < playSpace.size(); i++)
+		for (size_t j = 0; j < playSpace[i].length(); j++) {
 			// Border detection
 			bool border[] = { true,true,true,true }; // up, left, down,right
 
@@ -56,12 +38,12 @@ int next_gen(vector<std::vector<char>>& playSpace, vector<std::vector<char>>& ne
 			if (i == playSpace.size() - 1) border[2] = false; // Down border
 
 			if (j == 0) border[1] = false; // Left border
-			if (j == playSpace[i].size() - 1) border[3] = false; // Right border
+			if (j == playSpace[i].length() - 1) border[3] = false; // Right border
 
 			// Count neighboring cells
 			int count_neighbors = 0;
-			for (int k = i - border[0]; k <= i + border[2]; k++)
-				for (int l = j - border[1]; l <= j + border[3]; l++)
+			for (size_t k = i - border[0]; k <= i + border[2]; k++)
+				for (size_t l = j - border[1]; l <= j + border[3]; l++)
 					if (playSpace[k][l] != ' ') count_neighbors++;
 
 			// RULE IMPLEMENTATION
@@ -80,29 +62,26 @@ int next_gen(vector<std::vector<char>>& playSpace, vector<std::vector<char>>& ne
 	return count_cells; // Return ounter of living cells
 }
 
-int print_arr(vector<vector<char>>& next_arr){
-	auto write_workout = std::unique_ptr<std::ofstream>(new std::ofstream("work.out")); // Write to file
+int print_arr(vector<string>& next_arr){
 	
-	cerr.sync_with_stdio(false);
-	for (auto i : next_arr) {
-		for (auto j : i) {
-			switch ((j + 1) / 2) {
-			case 25: {cerr << "\x1B[48;5;235;37m" << j; break;}
-			case 26: {cerr << "\x1B[48;5;239;37m" << j; break;}
-			case 27: {cerr << "\x1B[48;5;243;30m" << j; break;}
-			case 28: {cerr << "\x1B[48;5;247;30m" << j; break;}
-			case 29: {cerr << "\x1B[48;5;251;30m" << j; break;}
-			case 33: {cerr << "\x1B[107;30m" << j; break;}
-			default: cerr << "\x1B[0m ";
-			}
-			*write_workout << j;
-		}
-		cerr << "\x1B[0m\n";
-		*write_workout << '\n';
-	}
-	write_workout->close();
+	auto out_func = [](vector<string> next_arr) { // Output (Now more than 30 fricking times faster on my machine !!!)
+		cerr.sync_with_stdio(false);
+		std::copy(next_arr.begin(), next_arr.end(), std::ostream_iterator<string>(cerr, "\n"));
+	};
 
-	return next_gen(*unique_ptr<vector<vector<char>>>(new vector<vector<char>>(next_arr)), next_arr); // Return alive cells to save space
+	auto file_func = [](vector<string> next_arr) { // Write to file
+		auto write_workout = std::unique_ptr<std::ofstream>(new std::ofstream("work.out")); 
+		std::copy(next_arr.begin(), next_arr.end(), std::ostream_iterator<string>(*write_workout, "\n"));
+		write_workout->close();
+	};
+
+	std::thread out(out_func, next_arr);
+	std::thread file_write(file_func, next_arr); // Multithreading to output it console and to file simultaneously
+
+	file_write.join();
+	out.join(); // Wait for them
+
+	return next_gen(*unique_ptr<vector<string>>(new vector<string>(next_arr)), next_arr); // Return alive cells to save space
 }
 
 int main(int argc, char** argv) {
@@ -132,11 +111,11 @@ int main(int argc, char** argv) {
 	srand(*seed); // Apply and delete seed
 	delete seed;
 
-	std::vector <std::vector <char>> playSpace(input_nums("Playing space height: "), std::vector<char>(input_nums("Playing space width: ")));
-	std::vector<char> chars(input_nums("Char count: ")); //generate char array
+	vector <string> playSpace(input_nums("Playing space height: "), *new string(input_nums("Playing space width: "),' ') );
+	vector<char> chars(input_nums("Char count: ")); //generate char array
 
 	// generate symbols inside
-	for (int i = chars.size() - 1; i >= 0; i--)
+	for (size_t i = chars.size() - 1; i != 0; i--)
 		chars[i] = 'a' + (rand() % 26);
 
 	char bact = chars[rand() % chars.size()]; //generate bacteria
@@ -144,8 +123,8 @@ int main(int argc, char** argv) {
 	std::ofstream write_workdat("work.dat");
 
 	// map bacterias
-	for (int i = playSpace.size() - 1; i >= 0; i--) {
-		for (int j = playSpace[i].size() - 1; j >= 0; j--) {
+	for (size_t i = 0; i < playSpace.size(); i++) {
+		for (size_t j = 0; j < playSpace[i].length(); j++) {
 			playSpace[i][j] = chars[rand() % chars.size()];
 			write_workdat << playSpace[i][j];
 			playSpace[i][j] = (playSpace[i][j] == bact ? '1' : ' ');
@@ -161,18 +140,19 @@ int main(int argc, char** argv) {
 	int alive = 1;
 
 	//walk through generations
-	for (int j = 0; j < gen; j++) {
-		cls();
-		//SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), { 0,0 });
+	for (int i = 0; i < gen; i++) {
+		auto before = std::chrono::high_resolution_clock::now();
 
-		printf("Gen: %d\n", j + 1); // Print current gen
+		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), { 0,0 });
+
+		printf("Gen: %d\n", i + 1); // Print current gen
 
 		alive = print_arr(playSpace); // Start function to walk through generations
 
 		// If everyone died end function
 		if (alive == 0) { printf("Everyone died  "); break; }
 		printf("%d cells alive      ", alive);
-		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+		std::this_thread::sleep_for(std::chrono::milliseconds(50) - (std::chrono::high_resolution_clock::now() - before));
 	}
 	cerr << "\nPress any key to exit";
 	cin.get();

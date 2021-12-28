@@ -27,37 +27,37 @@ int input_nums(const char* str) {
 	return *out;
 }
 
-int next_gen(vector<string>& playSpace, vector<string>& next_arr) {
+int next_gen(vector<string>& buffer, vector<string>& next_arr) {
 	int count_cells = 0; // Alive cells
-	for (size_t i = 0; i < playSpace.size(); i++)
-		for (size_t j = 0; j < playSpace[i].length(); j++) {
+	for (size_t i = 0; i < buffer.size(); i++)
+		for (size_t j = 0; j < buffer[i].length(); j++) {
 			// Border detection
 			bool border[] = { true,true,true,true }; // up, left, down,right
 
 			if (i == 0) border[0] = false; // Upper border
-			if (i == playSpace.size() - 1) border[2] = false; // Down border
+			if (i == buffer.size() - 1) border[2] = false; // Down border
 
 			if (j == 0) border[1] = false; // Left border
-			if (j == playSpace[i].length() - 1) border[3] = false; // Right border
+			if (j == buffer[i].length() - 1) border[3] = false; // Right border
 
 			// Count neighboring cells
 			int count_neighbors = 0;
 			for (size_t k = i - border[0]; k <= i + border[2]; k++)
 				for (size_t l = j - border[1]; l <= j + border[3]; l++)
-					if (playSpace[k][l] != ' ') count_neighbors++;
+					if (buffer[k][l] != ' ') count_neighbors++;
 
 			// RULE IMPLEMENTATION
 			// Cell can live for 12 cycles and with 2 or 3 neighbors (+1 to include cell itself)
-			if ((count_neighbors == 3 || count_neighbors == 4) && playSpace[i][j] != ' ' && playSpace[i][j] != 'B') {
-				if (playSpace[i][j] == '9') next_arr[i][j] = 'A'; // Use 12-digit system to align output
+			if ((count_neighbors == 3 || count_neighbors == 4) && buffer[i][j] != ' ' && buffer[i][j] != 'B') {
+				if (buffer[i][j] == '9') next_arr[i][j] = 'A'; // Use 12-digit system to align output
 				else next_arr[i][j]++; // Cell aging 
 			}
 			else next_arr[i][j] = ' '; //else it will die
 
-			if (playSpace[i][j] == ' ' && count_neighbors == 3) //spawn cell if exactly 3 neighbors exist (counter doesnt count cells, so no +1)
+			if (buffer[i][j] == ' ' && count_neighbors == 3) //spawn cell if exactly 3 neighbors exist (counter doesnt count cells, so no +1)
 				next_arr[i][j] = '1';
 
-			if (playSpace[i][j] != ' ') count_cells++; // Sount living cells
+			if (buffer[i][j] != ' ') count_cells++; // Sount living cells
 		}
 	return count_cells; // Return ounter of living cells
 }
@@ -111,7 +111,7 @@ int main(int argc, char** argv) {
 	srand(*seed); // Apply and delete seed
 	delete seed;
 
-	vector <string> playSpace(input_nums("Playing space height: "), *new string(input_nums("Playing space width: "),' ') );
+	vector <string> playSpace(input_nums("Playing space height: "), string(input_nums("Playing space width: "),' ') );
 	vector<char> chars(input_nums("Char count: ")); //generate char array
 
 	// generate symbols inside

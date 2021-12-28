@@ -8,7 +8,7 @@
 
 using std::vector;
 using std::string;
-using std::cerr; 
+using std::cerr;
 using std::cout;
 using std::cin;
 using std::vector;
@@ -62,15 +62,15 @@ int next_gen(vector<string>& buffer, vector<string>& next_arr) {
 	return count_cells; // Return ounter of living cells
 }
 
-int print_arr(vector<string>& next_arr){
-	
-	auto out_func = [](vector<string> next_arr) { // Output (Now more than 30 fricking times faster on my machine !!!)
+void print_arr(vector<string>& next_arr) {
+
+	auto out_func = [](vector<string> next_arr) { // Output to console
 		cerr.sync_with_stdio(false);
 		std::copy(next_arr.begin(), next_arr.end(), std::ostream_iterator<string>(cerr, "\n"));
 	};
 
 	auto file_func = [](vector<string> next_arr) { // Write to file
-		auto write_workout = std::unique_ptr<std::ofstream>(new std::ofstream("work.out")); 
+		auto write_workout = std::unique_ptr<std::ofstream>(new std::ofstream("work.out"));
 		std::copy(next_arr.begin(), next_arr.end(), std::ostream_iterator<string>(*write_workout, "\n"));
 		write_workout->close();
 	};
@@ -78,14 +78,13 @@ int print_arr(vector<string>& next_arr){
 	std::thread out(out_func, next_arr);
 	std::thread file_write(file_func, next_arr); // Multithreading to output it console and to file simultaneously
 
-	file_write.join();
-	out.join(); // Wait for them
-
-	return next_gen(*unique_ptr<vector<string>>(new vector<string>(next_arr)), next_arr); // Return alive cells to save space
+	out.join();
+	file_write.join(); // Wait for threads to execute
 }
 
 int main(int argc, char** argv) {
-	// Seed gen
+	//// Seed gen ////
+	
 	// used nullptr to have an idea of undefined variable 
 	unsigned* seed = nullptr;
 	// Scanning command line parameters to find "seed"
@@ -111,11 +110,15 @@ int main(int argc, char** argv) {
 	srand(*seed); // Apply and delete seed
 	delete seed;
 
-	vector <string> playSpace(input_nums("Playing space height: "), string(input_nums("Playing space width: "),' ') );
+	///////////////////
+	
+	//// Init Array ////
+
+	vector <string> playSpace(input_nums("Playing space height: "), string(input_nums("Playing space width: "), ' '));
 	vector<char> chars(input_nums("Char count: ")); //generate char array
 
 	// generate symbols inside
-	for (size_t i = chars.size() - 1; i != 0; i--)
+	for (size_t i = 0; i < chars.size(); i++)
 		chars[i] = 'a' + (rand() % 26);
 
 	char bact = chars[rand() % chars.size()]; //generate bacteria
@@ -133,8 +136,12 @@ int main(int argc, char** argv) {
 	}
 	write_workdat.close();
 
-	int gen = input_nums("Generations: "); // ask for generations
+	/////////////////
 
+	//// Main loop of simulation ////
+
+	int gen = input_nums("Generations: "); // ask for generations
+	
 	system("cls");
 
 	int alive = 1;
@@ -147,12 +154,13 @@ int main(int argc, char** argv) {
 
 		printf("Gen: %d\n", i + 1); // Print current gen
 
-		alive = print_arr(playSpace); // Start function to walk through generations
+		print_arr(playSpace); // Start function to walk through generations
 
-		// If everyone died end function
-		if (alive == 0) { printf("Everyone died  "); break; }
+		alive = next_gen(*unique_ptr<vector<string>>(new vector<string>(playSpace)), playSpace); // Count alive cells + generate next gen
+		if (alive == 0) { printf("Everyone died  "); break; } // If everyone died end function
 		printf("%d cells alive      ", alive);
-		std::this_thread::sleep_for(std::chrono::milliseconds(50) - (std::chrono::high_resolution_clock::now() - before));
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(50) - (std::chrono::high_resolution_clock::now() - before)); // Prevent too fast code execution
 	}
 	cerr << "\nPress any key to exit";
 	cin.get();

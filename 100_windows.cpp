@@ -6,36 +6,39 @@
 #include <chrono>
 #include <windows.h>
 
+using std::chrono::high_resolution_clock;
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
 using std::vector;
 using std::string;
-using std::cerr;
 using std::cout;
 using std::cin;
-using std::vector;
-using std::ofstream;
-using std::unique_ptr;
 
+constexpr short int fps = 1000 / 60; // FPS cap: Second/Frames
+
+// Input function for numbers
 unsigned input_nums(const char* str) {
 	unsigned out; // This will be out
-	std::cout << str; // Ask what to enter
-	while (!(std::cin >> out)) { // Request correct user input
+	cout << str; // Ask what to enter
+	while (!(cin >> out)) { // Request correct user input
 	// if any illegal char will be entered, program will ask for it again
-		std::cin.clear();
-		std::cin.ignore(1, '\n');
+		cin.clear();
+		cin.ignore(1, '\n');
 	}
-	// And out
-	return out;
+	return out; // And out
 }
 
-int next_gen(vector<string>& buffer, vector<string>& next_arr) {
+// Generate next array
+int next_gen(vector<string>& next_arr) {
 	int count_cells = 0; // Alive cells
+	vector<string> buffer = next_arr; // Copy array for buffering
 	for (size_t i = 0; i < buffer.size(); i++)
 		for (size_t j = 0; j < buffer[i].length(); j++) {
 			// Count neighboring cells
 			int count_neighbors = 0;
-			for (size_t k = i - (i != 0); k <= i + (i != buffer.size() - 1); k++) // Because true = 1 and false = 0, i can use them as a number
-				for (size_t l = j - (j != 0); l <= j + (j != buffer[i].length() - 1); l++)
-					if (buffer[k][l] != ' ') count_neighbors++;
+			for (short int k = -1 + (i == 0); k <= 1 - (i == buffer.size() - 1); k++) // Because true = 1 and false = 0, i can use them as a number
+				for (short int l = -1 + (j == 0); l <= 1 - (j == buffer[i].length() - 1); l++)
+					if (buffer[i+k][j+l] != ' ') count_neighbors++;
 
 			// RULE IMPLEMENTATION
 			// Cell can live for 12 cycles and with 2 or 3 neighbors (+1 to include cell itself)
@@ -53,29 +56,90 @@ int next_gen(vector<string>& buffer, vector<string>& next_arr) {
 	return count_cells; // Return ounter of living cells
 }
 
-void print_arr(vector<string>& next_arr) {
+// Output next array
+void print_arr(vector<string> next_arr) {
+	using std::copy;
+	using std::ostream_iterator;
 
-	auto out_func = [](vector<string> next_arr) { // Output to console
-		cerr.sync_with_stdio(false);
-		std::copy(next_arr.begin(), next_arr.end(), std::ostream_iterator<string>(cerr, "\n"));
-	};
-
-	auto file_func = [](vector<string> next_arr) { // Write to file
+	std::thread out([](vector<string> next_arr) { // Output to console
+		copy(next_arr.begin(), next_arr.end(), ostream_iterator<string>(cout, "\n"));
+	}, next_arr);
+	
+	std::thread file_write([](vector<string> next_arr) { // Write to file
 		auto write_workout = std::unique_ptr<std::ofstream>(new std::ofstream("work.out"));
-		std::copy(next_arr.begin(), next_arr.end(), std::ostream_iterator<string>(*write_workout, "\n"));
+		copy(next_arr.begin(), next_arr.end(), ostream_iterator<string>(*write_workout, "\n"));
 		write_workout->close();
-	};
-
-	std::thread out(out_func, next_arr);
-	std::thread file_write(file_func, next_arr); // Multithreading to output it console and to file simultaneously
+	}, next_arr); // Multithreading to output it console and to file simultaneously
+	
 
 	out.join();
 	file_write.join(); // Wait for threads to execute
 }
 
-int main(int argc, char** argv) {
-	//// Seed gen ////
+int fps_stabilizer(std::chrono::steady_clock::duration &before) { // Shows and stabilizes fps when needed
+	unsigned after = duration_cast<milliseconds>(high_resolution_clock::now().time_since_epoch() - before).count(); // Get execution time
+
+	if (after >= fps) // If code executes not fast, returns current fps
+		return 1000 / after;
+
+	std::this_thread::sleep_for(milliseconds(fps - after)); // Wait
+	return 1000 / fps; // Return capped fps 
+}
+
+// Simulation loop 
+void sim_loop(int gen,vector <string> playSpace) {
+	system("cls"); // Prepare space for simulation
+
+	int alive = 0; // Alive cells count
 	
+	for (int i = 0; i < gen; i++) { //walk through generations
+		auto before = high_resolution_clock::now().time_since_epoch(); // Start counting time of execution 
+
+		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), { 0,0 });
+
+		printf("Gen: %d\n", i + 1); // Print current gen
+
+		std::thread output(print_arr, playSpace); // Print array with cells
+
+		alive = next_gen(playSpace); // Generate new array
+		output.join(); // Wait for output
+		if (alive == 0) { printf("Everyone died  "); break; } // If everyone died end function
+		printf("%d cells alive      \nFPS: %d  \n",alive, fps_stabilizer(before));
+	}
+	if (alive != 0) cout << "\nGenerations ended";
+}
+
+// Init array
+vector <string> arr_make() {
+	vector <string> playSpace(input_nums("Playing space height: "), string(input_nums("Playing space width: "), ' ')); // Create new main array
+	vector <char> chars(input_nums("Char count: ")); // generate char array
+
+	// generate symbols inside
+	for (size_t i = 0; i < chars.size(); i++)
+		chars[i] = 'a' + (rand() % 26);
+
+	char bact = chars[rand() % chars.size()]; //generate bacteria
+
+	std::ofstream write_workdat("work.dat");
+
+	// map bacterias
+	for (size_t i = 0; i < playSpace.size(); i++) {
+		for (size_t j = 0; j < playSpace[i].length(); j++) {
+			playSpace[i][j] = chars[rand() % chars.size()];
+			write_workdat << playSpace[i][j]; // Write to file
+			playSpace[i][j] = (playSpace[i][j] == bact ? '1' : ' '); // Ig it is bacteria char, it changing on the go
+		}
+		write_workdat << '\n'; // Newline to output more readable work.dat
+	}
+	write_workdat.close(); // Close file
+	return playSpace; // return playing array
+}
+
+// Get seed and call function for array
+int main(int argc, char** argv) {
+	cout.sync_with_stdio(false);
+	cin.tie(NULL);
+
 	// used nullptr to have an idea of undefined variable 
 	unsigned* seed = nullptr;
 	// Scanning command line parameters to find "seed"
@@ -96,65 +160,14 @@ int main(int argc, char** argv) {
 		}
 	}
 	if (seed == nullptr) // if seed it unset (launch without command line params) it equals unixtime
-		seed = new unsigned(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
-	std::cout << "Seed: " << *seed << "\n";
+		seed = new unsigned(duration_cast<milliseconds>(high_resolution_clock::now().time_since_epoch()).count());
+	cout << "Seed: " << *seed << "\n";
 	srand(*seed); // Apply and delete seed
 	delete seed;
-
-	///////////////////
 	
-	//// Init Array ////
+	sim_loop(input_nums("Generation count: "), arr_make()); // Let's make playing field and launch simulation
 
-	vector <string> playSpace(input_nums("Playing space height: "), string(input_nums("Playing space width: "), ' '));
-	vector<char> chars(input_nums("Char count: ")); //generate char array
-
-	// generate symbols inside
-	for (size_t i = 0; i < chars.size(); i++)
-		chars[i] = 'a' + (rand() % 26);
-
-	char bact = chars[rand() % chars.size()]; //generate bacteria
-
-	std::ofstream write_workdat("work.dat");
-
-	// map bacterias
-	for (size_t i = 0; i < playSpace.size(); i++) {
-		for (size_t j = 0; j < playSpace[i].length(); j++) {
-			playSpace[i][j] = chars[rand() % chars.size()];
-			write_workdat << playSpace[i][j];
-			playSpace[i][j] = (playSpace[i][j] == bact ? '1' : ' ');
-		}
-		write_workdat << '\n';
-	}
-	write_workdat.close();
-
-	/////////////////
-
-	//// Main loop of simulation ////
-
-	int gen = input_nums("Generations: "); // ask for generations
-	
-	system("cls");
-
-	int alive = 1;
-
-	//walk through generations
-	for (int i = 0; i < gen; i++) {
-		auto before = std::chrono::high_resolution_clock::now();
-
-		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), { 0,0 });
-
-		printf("Gen: %d\n", i + 1); // Print current gen
-
-		print_arr(playSpace); // Start function to walk through generations
-
-		alive = next_gen(*unique_ptr<vector<string>>(new vector<string>(playSpace)), playSpace); // Count alive cells + generate next gen
-		if (alive == 0) { printf("Everyone died  "); break; } // If everyone died end function
-		printf("%d cells alive      ", alive);
-
-		std::this_thread::sleep_for(std::chrono::milliseconds(50) - (std::chrono::high_resolution_clock::now() - before)); // Prevent too fast code execution
-	}
-	if (alive != 0) cerr << "\nGenerations ended";
-	cerr << "\nPress any key to exit";
+	cout << "\nPress any key to exit";
 	cin.ignore();
 	cin.get();
 }
